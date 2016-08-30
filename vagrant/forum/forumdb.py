@@ -19,7 +19,7 @@ def GetAllPosts():
     DB = psycopg2.connect("dbname=forum")
     cursor = DB.cursor()
     cursor.execute("SELECT time,content FROM posts ORDER BY time DESC")
-    posts = ({'content':str(row[1]),'time':str(row[0])}
+    posts = ({'content':str(bleach.clean(row[1])),'time':str(row[0])}
               for row in cursor.fetchall())
     bleach.clean(posts)
     DB.close()
@@ -36,7 +36,8 @@ def AddPost(content):
     '''
     DB = psycopg2.connect("dbname=forum")
     cursor = DB.cursor()
-    cursor.execute("INSERT INTO posts (content) VALUES (%s)", bleach.clean((content,)))
+    clean = bleach.clean(content)
+    cursor.execute("INSERT INTO posts (content) VALUES (%s)", (clean,))#bleach.clean((content,)))
     DB.commit()
     DB.close()
     # t = time.strftime('%c', time.localtime())
